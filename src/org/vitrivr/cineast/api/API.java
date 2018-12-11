@@ -702,7 +702,8 @@ public class API {
             case "init_cache":{
               MediaObjectReader.warmUpCache();
               MediaSegmentReader.warmUpCache();
-                System.out.println("cache initialized");
+              MediaObjectMetadataReader.warmUpCache();
+              System.out.println("cache initialized");
               break;
             }
             default:
