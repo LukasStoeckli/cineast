@@ -7,19 +7,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vitrivr.cineast.core.importer.handlers.DataImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.gvision.GoogleVisionCategory;
-import org.vitrivr.cineast.core.importer.vbs2019.GoogleVisionImporter;
 import org.vitrivr.cineast.core.util.LogHelper;
 
 public class GoogleVisionImportHandler extends DataImportHandler {
 
   private static final Logger LOGGER = LogManager.getLogger();
   private final GoogleVisionCategory category;
-  private final boolean importTags;
+  private final boolean importTagsFt;
 
-  public GoogleVisionImportHandler(int threads, int batchsize, GoogleVisionCategory category, boolean importTags) {
+  public GoogleVisionImportHandler(int threads, int batchsize, GoogleVisionCategory category, boolean importTagsFt) {
     super(threads, batchsize);
     this.category = category;
-    this.importTags = importTags;
+    this.importTagsFt = importTagsFt;
   }
 
   @Override
@@ -27,7 +26,7 @@ public class GoogleVisionImportHandler extends DataImportHandler {
     try {
       Files.walk(root, 2).filter(p -> p.toString().toLowerCase().endsWith(".json")).forEach(p -> {
         try {
-          this.futures.add(this.service.submit(new DataImportRunner(new GoogleVisionImporter(p, category, importTags), category.tableName, "gvision-" + category + "-" + importTags+"-file")));
+          this.futures.add(this.service.submit(new DataImportRunner(new GoogleVisionImporter(p, category, importTagsFt), category.tableName, "gvision-" + category + "-" + importTagsFt +"-file")));
         } catch (IOException e) {
           LOGGER.fatal("Failed to open path at {} ", p);
           throw new RuntimeException(e);

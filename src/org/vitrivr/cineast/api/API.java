@@ -311,6 +311,7 @@ public class API {
         for (GoogleVisionCategory category : GoogleVisionCategory.values()) {
           GoogleVisionImportHandler _handler =
               new GoogleVisionImportHandler(1, batchsize, category, false);
+              new GoogleVisionImportHandler(1, batchsize, category, true);
           _handler.doImport(path);
           handlers.add(_handler);
         }

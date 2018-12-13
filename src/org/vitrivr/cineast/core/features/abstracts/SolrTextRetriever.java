@@ -68,6 +68,11 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
         10);
   }
 
+  @Override
+  public void processSegment(SegmentContainer shot) {
+    throw new UnsupportedOperationException("Not supported by default");
+  }
+
   /**
    * Initializes the persistent layer with two fields: "id" and "feature" both using the Apache Solr
    * storage handler. The "feature" in this context is the full text for the given segment

@@ -1,7 +1,7 @@
 {
 	"database": {
-		"host": "10.34.58.93",
-		"selector": "ADAMPRO",
+		"host": "localhost",
+		"selector": "ADAMPROSTREAM",
     "writer": "ADAMPRO",
 		"port": 5890,
 		"plaintext": true
@@ -11,9 +11,9 @@
 		"path": "benchmarks"
 	},
 	"retriever": {
-		"threadPoolSize": 2,
-		"maxResults": 200,
-		"resultsPerModule": 250,
+		"threadPoolSize": 4,
+		"maxResults": 1500,
+		"resultsPerModule": 1500,
 		"features": {
 			"semantic" : [
 				{"feature": "ConceptMasksAde20k", "weight" : 1.0}
@@ -96,6 +96,24 @@
 			],
 			"pitchsequence": [
 				//				{"feature": "MelodyEstimate", "weight": 1.0}
+			],
+			"captioning": [
+				{"feature": "DescriptionTextSearch", "weight": 1.0}
+			],
+			"ocr": [
+				{"feature": "OCRSearch", "weight": 1.0}
+			],
+			"tagsft": [
+				{"feature": "TagsFtSearch", "weight": 1.0}
+			],
+			"tags": [
+				{"feature": "SegmentTags", "weight": 1.0}
+			],
+			"metadataft": [
+				{"feature": "MetadataFtSearch", "weight": 1.0}
+			],
+			"audio": [
+				{"feature": "AudioTranscriptionSearch", "weight": 1.0}
 			]
 		}
 	},
