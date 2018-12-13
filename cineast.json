@@ -109,9 +109,6 @@
 			"tags": [
 				{"feature": "SegmentTags", "weight": 1.0}
 			],
-			"metadataft": [
-				{"feature": "MetadataFtSearch", "weight": 1.0}
-			],
 			"audio": [
 				{"feature": "AudioTranscriptionSearch", "weight": 1.0}
 			]
