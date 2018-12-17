@@ -3,6 +3,7 @@ package org.vitrivr.cineast.core.features.abstracts;
 import java.util.*;
 import java.util.function.Supplier;
 
+import org.apache.commons.math3.ml.neuralnet.MapUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,14 +20,14 @@ import org.vitrivr.cineast.core.db.DBSelector;
 import org.vitrivr.cineast.core.db.DBSelectorSupplier;
 import org.vitrivr.cineast.core.db.PersistencyWriterSupplier;
 import org.vitrivr.cineast.core.db.dao.writer.SimpleFulltextFeatureDescriptorWriter;
+import org.vitrivr.cineast.core.features.VideoMetadata;
 import org.vitrivr.cineast.core.features.extractor.Extractor;
 import org.vitrivr.cineast.core.features.retriever.Retriever;
 import org.vitrivr.cineast.core.setup.AttributeDefinition;
 import org.vitrivr.cineast.core.setup.EntityCreator;
 
 /**
- * This is a proof of concept class and will probably be replaced by a more general solution to text
- * retrieval in the future
+ * This is a proof of concept class and will probably be replaced by a more general solution to text retrieval in the future
  */
 public abstract class SolrTextRetriever implements Retriever, Extractor {
 
@@ -74,8 +75,7 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
   }
 
   /**
-   * Initializes the persistent layer with two fields: "id" and "feature" both using the Apache Solr
-   * storage handler. The "feature" in this context is the full text for the given segment
+   * Initializes the persistent layer with two fields: "id" and "feature" both using the Apache Solr storage handler. The "feature" in this context is the full text for the given segment
    */
   @Override
   public void initalizePersistentLayer(Supplier<EntityCreator> supply) {
@@ -110,9 +110,7 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
   }
 
   /**
-   * Performs a fulltext search using the text specified in {@link SegmentContainer#getText()}. In
-   * contrast to convention used in most feature modules, the data used during ingest and retrieval
-   * is usually different for {@link SolrTextRetriever} subclasses.
+   * Performs a fulltext search using the text specified in {@link SegmentContainer#getText()}. In contrast to convention used in most feature modules, the data used during ingest and retrieval is usually different for {@link SolrTextRetriever} subclasses.
    *
    * <strong>Important:</strong> This implementation is tailored to the Apache Solr storage engine
    * used by ADAMpro. It uses Lucene's fuzzy search functionality.
@@ -126,14 +124,18 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
   /**
    * Generate a query term which will then be used for retrieval.
    */
-  protected abstract String[] generateQuery(SegmentContainer sc, ReadableQueryConfig qc);
+  protected String[] generateQuery(SegmentContainer sc, ReadableQueryConfig qc) {
+    return sc.getText().split(" ");
+  }
 
   /**
    * Convenience-Method for implementing classes once they have generated their query terms
    */
   protected List<ScoreElement> getSimilar(ReadableQueryConfig qc, String... terms) {
     final List<Map<String, PrimitiveTypeProvider>> resultList = this.selector
-        .getFulltextRows(Config.sharedConfig().getRetriever().getMaxResultsPerModule(), SimpleFulltextFeatureDescriptor.FIELDNAMES[1], terms);
+        .getFulltextRows(getMaxResults(), SimpleFulltextFeatureDescriptor.FIELDNAMES[1], terms);
+
+    LOGGER.debug("Result example {}", Arrays.toString(resultList.get(0).entrySet().toArray()));
 
     final CorrespondenceFunction f = CorrespondenceFunction
         .fromFunction(score -> score / terms.length / 10f);
@@ -142,9 +144,20 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
     for (Map<String, PrimitiveTypeProvider> result : resultList) {
       String id = result.get("id").getString();
       double score = f.applyAsDouble(result.get("ap_score").getFloat());
-      scoreElements.add(new SegmentScoreElement(id, score));
+      scoreElements.add(generateScore(id, score));
     }
     return scoreElements;
+  }
+
+  protected int getMaxResults() {
+    return Config.sharedConfig().getRetriever().getMaxResultsPerModule();
+  }
+
+  /**
+   * Is a seperate method to avoid code duplication in {@link VideoMetadata}
+   */
+  protected ScoreElement generateScore(String id, double score) {
+    return new SegmentScoreElement(id, score);
   }
 
   @Override

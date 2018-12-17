@@ -15,8 +15,4 @@ public class TagsFtSearch extends SolrTextRetriever {
     super(TagsFtSearch.TAGS_FT_TABLE_NAME);
   }
 
-  @Override
-  protected String[] generateQuery(SegmentContainer sc, ReadableQueryConfig qc) {
-    return sc.getText().split(" ");
-  }
 }

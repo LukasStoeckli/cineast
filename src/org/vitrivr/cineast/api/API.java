@@ -56,6 +56,7 @@ import org.vitrivr.cineast.core.importer.handlers.ProtoDataImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.AudioTranscriptImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.CaptionTextImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.GoogleVisionImportHandler;
+import org.vitrivr.cineast.core.importer.vbs2019.MetadataImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.TagImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.gvision.GoogleVisionCategory;
 import org.vitrivr.cineast.core.render.JOGLOffscreenRenderer;
@@ -304,24 +305,41 @@ public class API {
         handler = new TagImportHandler(1, batchsize);
         handler.doImport(path);
         break;
-      case "vision":
-        LOGGER.info("Starting import for Google Vision files at {}", path);
-        List<GoogleVisionImportHandler> handlers = new ArrayList<>();
-        for (GoogleVisionCategory category : GoogleVisionCategory.values()) {
-          GoogleVisionImportHandler _handler =
-              new GoogleVisionImportHandler(1, batchsize, category, false);
-          _handler.doImport(path);
-          handlers.add(_handler);
-          if (category == GoogleVisionCategory.LABELS || category == GoogleVisionCategory.WEB) {
-            GoogleVisionImportHandler _handlerTrue = new GoogleVisionImportHandler(1, batchsize, category, true);
-            _handlerTrue.doImport(path);
-            handlers.add(_handlerTrue);
-          }
-        }
-        handlers.forEach(GoogleVisionImportHandler::waitForCompletion);
-        LOGGER.info("Submitted all Google Vision imports for {}", path);
+      case "meta":
+        handler = new MetadataImportHandler(1, batchsize);
+        handler.doImport(path);
         break;
+      case "vision":
+        visionImport(Paths.get(path+"/gvision.json"), batchsize);
+        break;
+      case "text19":
+        AudioTranscriptImportHandler audioHandler = new AudioTranscriptImportHandler(1, 100000);
+        audioHandler.doImport(Paths.get(path + "/audiomerge.json"));
+        CaptionTextImportHandler captionHandler = new CaptionTextImportHandler(1, 100000);
+        captionHandler.doImport(Paths.get(path+"/captions.json"));
+        MetadataImportHandler metaHandler = new MetadataImportHandler(1, 100);
+        metaHandler.doImport(Paths.get(path+"/metamerge.json"));
+        visionImport(Paths.get(path+"/gvision.json"), batchsize);
+      break;
     }
+  }
+
+  private static void visionImport(Path path, int batchsize){
+    LOGGER.info("Starting import for Google Vision files at {}", path);
+    List<GoogleVisionImportHandler> handlers = new ArrayList<>();
+    for (GoogleVisionCategory category : GoogleVisionCategory.values()) {
+      GoogleVisionImportHandler _handler =
+          new GoogleVisionImportHandler(1, batchsize, category, false);
+      _handler.doImport(path);
+      handlers.add(_handler);
+      if (category == GoogleVisionCategory.LABELS || category == GoogleVisionCategory.WEB) {
+        GoogleVisionImportHandler _handlerTrue = new GoogleVisionImportHandler(1, batchsize, category, true);
+        _handlerTrue.doImport(path);
+        handlers.add(_handlerTrue);
+      }
+    }
+    handlers.forEach(GoogleVisionImportHandler::waitForCompletion);
+    LOGGER.info("Submitted all Google Vision imports for {}", path);
   }
 
   /**
