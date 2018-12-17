@@ -111,6 +111,9 @@
 			],
 			"audio": [
 				{"feature": "AudioTranscriptionSearch", "weight": 1.0}
+			],
+			"meta": [
+				{"feature": "VideoMetadata", "weight": 1.0}
 			]
 		}
 	},
