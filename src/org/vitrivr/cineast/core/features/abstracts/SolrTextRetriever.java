@@ -135,8 +135,6 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
     final List<Map<String, PrimitiveTypeProvider>> resultList = this.selector
         .getFulltextRows(getMaxResults(), SimpleFulltextFeatureDescriptor.FIELDNAMES[1], terms);
 
-    LOGGER.debug("Result example {}", Arrays.toString(resultList.get(0).entrySet().toArray()));
-
     final CorrespondenceFunction f = CorrespondenceFunction
         .fromFunction(score -> score / terms.length / 10f);
     final List<ScoreElement> scoreElements = new ArrayList<>(resultList.size());
