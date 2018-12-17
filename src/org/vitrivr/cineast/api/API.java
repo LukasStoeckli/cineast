@@ -315,13 +315,13 @@ public class API {
       case "text19":
         AudioTranscriptImportHandler audioHandler = new AudioTranscriptImportHandler(1, 100000);
         audioHandler.doImport(Paths.get(path + "/audiomerge.json"));
-        TagImportHandler tagHandler = new TagImportHandler(1, batchsize);
+        TagImportHandler tagHandler = new TagImportHandler(1, 100000);
         tagHandler.doImport(Paths.get(path+"/tags.json"));
         CaptionTextImportHandler captionHandler = new CaptionTextImportHandler(1, 100000);
         captionHandler.doImport(Paths.get(path+"/captions.json"));
         MetadataImportHandler metaHandler = new MetadataImportHandler(1, 100);
         metaHandler.doImport(Paths.get(path+"/metamerge.json"));
-        visionImport(Paths.get(path+"/gvision.json"), batchsize);
+        visionImport(Paths.get(path+"/gvision.json"), 100000);
       break;
     }
   }
