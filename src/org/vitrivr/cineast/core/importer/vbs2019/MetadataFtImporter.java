@@ -49,7 +49,7 @@ public class MetadataFtImporter implements Importer<Pair<String, String>> {
           return Optional.empty();
         }
         //TODO here we store the completly serialized JSON-String
-        return Optional.of(new Pair<>(String.format("%05d", _movieIDCounter), _node.toString()));
+        return Optional.of(new Pair<>("v_"+String.format("%05d", _movieIDCounter), _node.toString()));
       } else {
         LOGGER.info("done");
         return Optional.empty();
