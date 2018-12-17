@@ -315,6 +315,8 @@ public class API {
       case "text19":
         AudioTranscriptImportHandler audioHandler = new AudioTranscriptImportHandler(1, 100000);
         audioHandler.doImport(Paths.get(path + "/audiomerge.json"));
+        TagImportHandler tagHandler = new TagImportHandler(1, batchsize);
+        tagHandler.doImport(Paths.get(path+"/tags.json"));
         CaptionTextImportHandler captionHandler = new CaptionTextImportHandler(1, 100000);
         captionHandler.doImport(Paths.get(path+"/captions.json"));
         MetadataImportHandler metaHandler = new MetadataImportHandler(1, 100);
