@@ -2,7 +2,12 @@ package org.vitrivr.cineast.core.features.neuralnet.tf.models.deeplab;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.awt.Color;
 import java.util.Collection;
+import org.vitrivr.cineast.core.color.ColorConverter;
+import org.vitrivr.cineast.core.color.RGBContainer;
+import org.vitrivr.cineast.core.color.ReadableRGBContainer;
+import org.vitrivr.cineast.core.color.ReadableYCbCrContainer;
 
 public enum DeepLabLabel {
 
@@ -54,7 +59,7 @@ public enum DeepLabLabel {
   Cradle(118, -1, -1, -420.2261206, 155.0430906),
   Curtain(19, -1, -1, 131.0961824, -81.15440637),
   Cushion(40, -1, -1, -292.4862833, -164.3949626),
-  dence(-1, -1, 17, 357.6441879, 376.295578),
+  Dence(-1, -1, 17, 357.6441879, 376.295578),
   Desk(34, -1, -1, -287.2049761, 60.99762674),
   Dishwasher(130, -1, -1, -149.642726, 389.5671712),
   Dog(-1, 17, -1, -369.3873623, -453.9125812),
@@ -168,6 +173,8 @@ public enum DeepLabLabel {
   private static final TIntObjectHashMap<DeepLabLabel> pascalvocMap = new TIntObjectHashMap<>();
   private static final TIntObjectHashMap<DeepLabLabel> cityscapesMap = new TIntObjectHashMap<>();
 
+  private static double maxX, minX, maxY, minY;
+
   static {
     for (DeepLabLabel label : DeepLabLabel.values()) {
       if (label.ade20kId > 0) {
@@ -179,6 +186,14 @@ public enum DeepLabLabel {
       if (label.cityscapesId > 0) {
         cityscapesMap.put(label.cityscapesId, label);
       }
+
+      if (label.embeddX > -1000 && label.embeddY > -1000){
+        maxX = Math.max(maxX, label.embeddX);
+        maxY = Math.max(maxY, label.embeddY);
+        minX = Math.min(minX, label.embeddX);
+        minY = Math.min(minY, label.embeddY);
+      }
+
     }
   }
 
@@ -278,6 +293,18 @@ public enum DeepLabLabel {
     }
 
     return dominant;
+
+  }
+
+  public static int getColor(DeepLabLabel label){
+    if(label == NOTHING){
+      return ReadableRGBContainer.toIntColor(0, 0, 0);
+    }
+
+    int x = (int) (((label.embeddX - minX) / (maxX - minX)) * 255);
+    int y = (int) (((label.embeddY - minY) / (maxY - minY)) * 255);
+
+    return RGBContainer.toIntColor(x, y, (x + y) / 2);
 
   }
 

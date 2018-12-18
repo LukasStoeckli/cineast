@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.function.Predicate;
 import org.vitrivr.cineast.core.config.Config;
 import org.vitrivr.cineast.core.data.providers.primitive.PrimitiveTypeProvider;
 import org.vitrivr.cineast.core.db.PersistencyWriter;
@@ -31,10 +32,14 @@ public class Copier implements AutoCloseable {
 	}
 
 	public void copy(){
-		this.copyFrom(this.importer);
+		this.copy(x -> true);
 	}
 
-	public void copyFrom(Importer<?> importer){
+	public void copy(Predicate<Map<String, PrimitiveTypeProvider>> filter){
+		this.copyFrom(this.importer, filter);
+	}
+
+	public void copyFrom(Importer<?> importer, Predicate<Map<String, PrimitiveTypeProvider>> filter){
 		Map<String, PrimitiveTypeProvider> map = importer.readNextAsMap();
 		
 		if(map == null){
@@ -55,6 +60,9 @@ public class Copier implements AutoCloseable {
 		Object[] objects = new Object[names.length];
 		
 		do{
+			if(!filter.test(map)){
+				continue;
+			}
 			for(i = 0; i < names.length; ++i){
 				objects[i] = PrimitiveTypeProvider.getObject(map.get(names[i]));
 			}
@@ -68,10 +76,14 @@ public class Copier implements AutoCloseable {
 	}
 
 	public void copyBatched(int batchSize){
-		this.copyBatchedFrom(batchSize, this.importer);
+		this.copyBatched(batchSize, x -> true);
 	}
 
-	public void copyBatchedFrom(int batchSize, Importer<?> importer){
+	public void copyBatched(int batchSize, Predicate<Map<String, PrimitiveTypeProvider>> filter){
+		this.copyBatchedFrom(batchSize, this.importer, filter);
+	}
+
+	public void copyBatchedFrom(int batchSize, Importer<?> importer, Predicate<Map<String, PrimitiveTypeProvider>> filter){
 	  
 	  if(batchSize <= 0){
 	    copy();
@@ -100,6 +112,9 @@ public class Copier implements AutoCloseable {
     ArrayList<PersistentTuple> tupleCache = new ArrayList<>(batchSize);
     
     do{
+    	if(!filter.test(map)){
+    		continue;
+			}
       for(i = 0; i < names.length; ++i){
         objects[i] = PrimitiveTypeProvider.getObject(map.get(names[i]));
       }
