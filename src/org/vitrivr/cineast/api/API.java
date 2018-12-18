@@ -327,6 +327,8 @@ public class API {
         MetadataImportHandler metaHandler = new MetadataImportHandler(1, 100);
         metaHandler.doImport(Paths.get(path + "/metamerge.json"));
         visionImport(Paths.get(path + "/gvision.json"), 100000);
+        TagFtCSVImportHandler csvHandler = new TagFtCSVImportHandler(1, 100000);
+        csvHandler.doImport(Paths.get(path+"/Action_Labels.csv"));
         break;
     }
   }
