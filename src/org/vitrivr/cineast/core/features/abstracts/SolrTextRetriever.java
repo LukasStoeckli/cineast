@@ -141,7 +141,7 @@ public abstract class SolrTextRetriever implements Retriever, Extractor {
 
     for (Map<String, PrimitiveTypeProvider> result : resultList) {
       String id = result.get("id").getString();
-      double score = f.applyAsDouble(result.get("ap_score").getFloat());
+      double score = Math.min(1, f.applyAsDouble(result.get("ap_score").getFloat()));
       scoreElements.add(generateScore(id, score));
     }
     return scoreElements;
