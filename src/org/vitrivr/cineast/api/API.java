@@ -57,6 +57,7 @@ import org.vitrivr.cineast.core.importer.vbs2019.AudioTranscriptImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.CaptionTextImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.GoogleVisionImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.MetadataImportHandler;
+import org.vitrivr.cineast.core.importer.vbs2019.TagFtCSVImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.TagImportHandler;
 import org.vitrivr.cineast.core.importer.vbs2019.gvision.GoogleVisionCategory;
 import org.vitrivr.cineast.core.render.JOGLOffscreenRenderer;
@@ -310,23 +311,27 @@ public class API {
         handler.doImport(path);
         break;
       case "vision":
-        visionImport(Paths.get(path+"/gvision.json"), batchsize);
+        visionImport(Paths.get(path + "/gvision.json"), batchsize);
+        break;
+      case "action":
+        handler = new TagFtCSVImportHandler(1, batchsize);
+        handler.doImport(path);
         break;
       case "text19":
         AudioTranscriptImportHandler audioHandler = new AudioTranscriptImportHandler(1, 100000);
         audioHandler.doImport(Paths.get(path + "/audiomerge.json"));
         TagImportHandler tagHandler = new TagImportHandler(1, 100000);
-        tagHandler.doImport(Paths.get(path+"/tags.json"));
+        tagHandler.doImport(Paths.get(path + "/tags.json"));
         CaptionTextImportHandler captionHandler = new CaptionTextImportHandler(1, 100000);
-        captionHandler.doImport(Paths.get(path+"/captions.json"));
+        captionHandler.doImport(Paths.get(path + "/captions.json"));
         MetadataImportHandler metaHandler = new MetadataImportHandler(1, 100);
-        metaHandler.doImport(Paths.get(path+"/metamerge.json"));
-        visionImport(Paths.get(path+"/gvision.json"), 100000);
-      break;
+        metaHandler.doImport(Paths.get(path + "/metamerge.json"));
+        visionImport(Paths.get(path + "/gvision.json"), 100000);
+        break;
     }
   }
 
-  private static void visionImport(Path path, int batchsize){
+  private static void visionImport(Path path, int batchsize) {
     LOGGER.info("Starting import for Google Vision files at {}", path);
     List<GoogleVisionImportHandler> handlers = new ArrayList<>();
     for (GoogleVisionCategory category : GoogleVisionCategory.values()) {
