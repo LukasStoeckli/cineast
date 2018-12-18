@@ -50,7 +50,7 @@
 			"motion": [
 				{"feature": "SubDivMotionHistogram3", "weight": 0.5},
 //				{"feature": "SubDivMotionHistogram5", "weight": 0.5},
-				{"feature": "SubDivMotionHistogramBackground3", "weight": 0.5},
+				{"feature": "SubDivMotionHistogramBackground3", "weight": 0.5}//,
 //				{"feature": "SubDivMotionHistogramBackground5", "weight": 0.5}
 			],
 			"quantized": [
