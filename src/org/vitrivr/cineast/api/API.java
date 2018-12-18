@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
@@ -34,10 +35,13 @@ import org.vitrivr.cineast.core.config.Config;
 import org.vitrivr.cineast.core.config.IngestConfig;
 import org.vitrivr.cineast.core.config.QueryConfig;
 import org.vitrivr.cineast.core.data.entities.MediaObjectMetadataDescriptor;
+import org.vitrivr.cineast.core.data.entities.SimpleFulltextFeatureDescriptor;
 import org.vitrivr.cineast.core.data.m3d.Mesh;
+import org.vitrivr.cineast.core.data.providers.primitive.PrimitiveTypeProvider;
 import org.vitrivr.cineast.core.data.score.SegmentScoreElement;
 import org.vitrivr.cineast.core.data.tag.IncompleteTag;
 import org.vitrivr.cineast.core.data.tag.Tag;
+import org.vitrivr.cineast.core.db.DBSelector;
 import org.vitrivr.cineast.core.db.dao.TagHandler;
 import org.vitrivr.cineast.core.db.dao.reader.MediaObjectMetadataReader;
 import org.vitrivr.cineast.core.db.dao.reader.MediaObjectReader;
@@ -45,6 +49,10 @@ import org.vitrivr.cineast.core.db.dao.reader.MediaSegmentReader;
 import org.vitrivr.cineast.core.evaluation.EvaluationConfig;
 import org.vitrivr.cineast.core.evaluation.EvaluationException;
 import org.vitrivr.cineast.core.evaluation.EvaluationRuntime;
+import org.vitrivr.cineast.core.features.AudioTranscriptionSearch;
+import org.vitrivr.cineast.core.features.DescriptionTextSearch;
+import org.vitrivr.cineast.core.features.OCRSearch;
+import org.vitrivr.cineast.core.features.TagsFtSearch;
 import org.vitrivr.cineast.core.features.codebook.CodebookGenerator;
 import org.vitrivr.cineast.core.features.listener.RetrievalResultCSVExporter;
 import org.vitrivr.cineast.core.features.retriever.RetrieverInitializer;
@@ -328,7 +336,7 @@ public class API {
         metaHandler.doImport(Paths.get(path + "/metamerge.json"));
         visionImport(Paths.get(path + "/gvision.json"), 100000);
         TagFtCSVImportHandler csvHandler = new TagFtCSVImportHandler(1, 100000);
-        csvHandler.doImport(Paths.get(path+"/Action_Labels.csv"));
+        csvHandler.doImport(Paths.get(path + "/Action_Labels.csv"));
         break;
     }
   }
@@ -515,6 +523,31 @@ public class API {
                 batchsize = Integer.parseInt(commands.get(3));
               }
               handleImport(path, mode, batchsize);
+              break;
+            }
+            case "debug": {
+              String id = commands.get(1);
+              String movieID = id.substring(0, id.lastIndexOf("_"));
+              int sequenceID = Integer.parseInt(id.split("_")[2]);
+              List<String> candidates = new ArrayList<>();
+              for (int idx = -5; idx < 5; idx++) {
+                candidates.add(movieID + "_" + (sequenceID + idx));
+              }
+
+              List<String> debugTables = new ArrayList<>();
+              debugTables.add(AudioTranscriptionSearch.AUDIO_TRANSCRIPTION_TABLE_NAME);
+              debugTables.add(OCRSearch.OCR_TABLE_NAME);
+              debugTables.add(TagsFtSearch.TAGS_FT_TABLE_NAME);
+              debugTables.add(DescriptionTextSearch.DESCRIPTION_TEXT_TABLE_NAME);
+              DBSelector selector = Config.sharedConfig().getDatabase().getSelectorSupplier().get();
+              for (String table : debugTables) {
+                selector.open(table);
+                LOGGER.debug("Querying table {}", table);
+                List<Map<String, PrimitiveTypeProvider>> rows = selector.getRows(SimpleFulltextFeatureDescriptor.FIELDNAMES[0], candidates);
+                rows.forEach(row -> LOGGER.debug("id {} has feature {}", row.get("id"), row.get("feature")));
+              }
+              selector.close();
+
               break;
             }
             case "3d":
