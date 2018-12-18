@@ -30,7 +30,10 @@ public class MediaSegmentReader extends AbstractEntityReader {
   private static final MediaSegmentDescriptor NULL = new MediaSegmentDescriptor();
   private static final Logger LOGGER = LogManager.getLogger();
   private static boolean USE_CACHE = true; // TODO expose to config
-  /** Default constructor. */
+
+  /**
+   * Default constructor.
+   */
   public MediaSegmentReader() {
     this(Config.sharedConfig().getDatabase().getSelectorSupplier().get());
   }
@@ -158,15 +161,27 @@ public class MediaSegmentReader extends AbstractEntityReader {
   public ListMultimap<String, MediaSegmentDescriptor> lookUpSegmentsOfObjects(
       Iterable<String> objectIds) {
 
+    List<String> uncachedIds = new ArrayList<>();
     if (USE_CACHE) {
       ListMultimap<String, MediaSegmentDescriptor> _return = ArrayListMultimap.create();
       for (String objectId : objectIds) {
+        boolean cached = false;
         for (MediaSegmentDescriptor msd : CACHE.values()) {
           if (msd.getObjectId().equals(objectId)) {
             _return.put(objectId, msd);
+            cached = true;
           }
         }
+        if (!cached) {
+          uncachedIds.add(objectId);
+        }
       }
+      Stream<MediaSegmentDescriptor> descriptors =
+          this.lookUpSegmentsByField(FIELDNAMES[1], uncachedIds);
+      descriptors.forEach(el -> {
+        CACHE.put(el.getObjectId(), el);
+        _return.put(el.getObjectId(), el);
+      });
       return _return;
     }
 
@@ -194,8 +209,8 @@ public class MediaSegmentReader extends AbstractEntityReader {
         .map(Optional::get);
   }
 
-  public static void warmUpCache(){
-    if (!USE_CACHE){
+  public static void warmUpCache() {
+    if (!USE_CACHE) {
       return;
     }
     DBSelector selector = Config.sharedConfig().getDatabase().getSelectorSupplier().get();
@@ -203,7 +218,7 @@ public class MediaSegmentReader extends AbstractEntityReader {
     List<Map<String, PrimitiveTypeProvider>> all = selector.getAll();
     for (Map<String, PrimitiveTypeProvider> map : all) {
       Optional<MediaSegmentDescriptor> msd = propertiesToDescriptor(map);
-      if(msd.isPresent()){
+      if (msd.isPresent()) {
         CACHE.put(msd.get().getSegmentId(), msd.get());
       }
     }

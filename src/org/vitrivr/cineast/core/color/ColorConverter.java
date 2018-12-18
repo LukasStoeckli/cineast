@@ -282,6 +282,16 @@ public final class ColorConverter {
 
   }
 
+  public static RGBContainer YCbCrtoRGB(ReadableYCbCrContainer ycbcr){
+    int r = Math.round((298.082f * ycbcr.y / 256f) + (408.583f * ycbcr.cr / 256f) - 222.921f);
+    int g = Math.round((298.082f * ycbcr.y / 256f) - (100.291f * ycbcr.cb / 256f) - (208.12f * ycbcr.cr / 256f) + 135.576f);
+    int b = Math.round((298.082f * ycbcr.y / 256f) + (516.421f * ycbcr.cb / 256f) - 276.836f);
+
+    return new RGBContainer(r, g, b);
+  }
+
+
+
   /**
    * can be used to collapse Lab values which are equivalent in RGB into consistent representation
    */
