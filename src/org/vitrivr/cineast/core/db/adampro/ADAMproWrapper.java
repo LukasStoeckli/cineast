@@ -1,11 +1,13 @@
 package org.vitrivr.cineast.core.db.adampro;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import io.grpc.ManagedChannel;
+import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -35,12 +37,6 @@ import org.vitrivr.cineast.core.config.Config;
 import org.vitrivr.cineast.core.config.DatabaseConfig;
 import org.vitrivr.cineast.core.util.LogHelper;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import io.grpc.ManagedChannel;
-import io.grpc.netty.NettyChannelBuilder;
-import io.grpc.stub.StreamObserver;
-import sun.awt.EventListenerAggregate;
 
 public class ADAMproWrapper implements AutoCloseable {
 
