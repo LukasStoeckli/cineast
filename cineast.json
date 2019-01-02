@@ -43,7 +43,7 @@
 			"edge": [
 //				{"feature": "EdgeARP88", "weight": 0.85},
 //				{"feature": "EdgeGrid16", "weight": 1.15},
-				{"feature": "EHD", "weight": 0.7},
+//				{"feature": "EHD", "weight": 0.7},
 //				{"feature": "DominantEdgeGrid16", "weight": 1.4},
 				{"feature": "DominantEdgeGrid8", "weight": 1.4}
 			],
@@ -68,7 +68,7 @@
 			"localfeatures_fast": [
 //				{"feature": "SURFMirflickr25K256", "weight": 1.75},
 //				{"feature": "HOGMirflickr25K256", "weight": 1.0}
-			],
+			]/*,
 			"audiofingerprint": [
 				{"feature": "AudioFingerprint", "weight": 1.0}
 			],
@@ -96,7 +96,7 @@
 			],
 			"pitchsequence": [
 				//				{"feature": "MelodyEstimate", "weight": 1.0}
-			],
+			]*/,
 			"captioning": [
 				{"feature": "DescriptionTextSearch", "weight": 1.0}
 			],
