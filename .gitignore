@@ -49,3 +49,6 @@ index*
 
 ##JSON
 /db/**/*.json
+
+##apple
+.DS_Store

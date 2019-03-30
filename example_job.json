@@ -1,11 +1,11 @@
 {
-	"type":"VIDEO",
+	"type":"IMAGE",
 	"input":{
-		"path": "/home/ubuntu/osvc/videos",
-		"depth": 3,
+		"path": "/Users/Lukas/Downloads/imgserver2/html/images/",
+		"depth": 2,
 		"skip": 0,
 		"id": {
-			"name": "SequentialObjectIdGenerator",
+			"name": "UniqueObjectIdGenerator",
 			"properties": {}
 		}
 	},
@@ -32,12 +32,8 @@
 		{
 			"name": "ShotThumbNails",
 			"properties": {
-				"destination":"/home/ubuntu/osvc/thumbnails"
+				"destination":"/Users/Lukas/Downloads/imgserver2/html/thumbnails/"
 			}
 		}
-	],
-	"database":{
-		"writer": "PROTO",
-		"selector": "NONE"
-	}
+	]
 }
