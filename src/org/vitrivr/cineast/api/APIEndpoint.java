@@ -8,6 +8,7 @@ import org.vitrivr.cineast.api.rest.handlers.actions.session.*;
 import org.vitrivr.cineast.api.rest.handlers.interfaces.ActionHandler;
 import org.vitrivr.cineast.api.rest.resolvers.FileSystemObjectResolver;
 import org.vitrivr.cineast.api.rest.resolvers.FileSystemThumbnailResolver;
+import org.vitrivr.cineast.api.rest.routes.IIIFRoute;
 import org.vitrivr.cineast.api.rest.routes.ResolvedContentRoute;
 import org.vitrivr.cineast.api.websocket.WebsocketAPI;
 import org.vitrivr.cineast.core.config.APIConfig;
@@ -175,7 +176,10 @@ public class APIEndpoint {
                     new File(Config.sharedConfig().getApi().getObjectLocation()))));
           });
         }
-
+        service.path(makePath("iiif"), () -> {
+            service.get("/", new IIIFRoute());
+            service.post("/register", new IIIFRoute());
+        });
     }
 
     /**
