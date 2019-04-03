@@ -1,6 +1,8 @@
 package org.vitrivr.cineast.api.rest.iiif;
 
-import com.eclipsesource.json.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 
@@ -13,17 +15,17 @@ public class IIIFRequest {
     private String endpoint;
     private ArrayList<Content> content;
     // error
-    private JsonObject requestError;
-    private JsonObject processError;
+    private ObjectNode requestError;
+    private ObjectNode processError;
     // getters
     public String getInstitution() {return institution;}
     public String getEndpoint() {return endpoint;}
     public ArrayList<Content> getContent() {return content;}
-    public JsonObject getRequestError() {return requestError;}
+    public ObjectNode getRequestError() {return requestError;}
     // setters
     public void setInstitution(String _institution) {institution = _institution;}
     public void setEndpoint(String _endpoint) {endpoint = _endpoint;}
-    public void setRequestError(JsonObject _requestError) {requestError = _requestError;}
+    public void setRequestError(ObjectNode _requestError) {requestError = _requestError;}
     // add content
     public void addContent(String _project, String _image, String _meta) {
         content.add(new Content(_project, _image, _meta));
@@ -42,7 +44,7 @@ public class IIIFRequest {
 
 
     // get images and start exporter
-    public JsonObject process() {
+    public ObjectNode process() {
 
         // foo.resolve(this)
         // bar.extract(whatever)

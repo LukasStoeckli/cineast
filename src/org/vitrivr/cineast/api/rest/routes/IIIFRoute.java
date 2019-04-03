@@ -1,18 +1,30 @@
 package org.vitrivr.cineast.api.rest.routes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.vitrivr.cineast.api.rest.exceptions.MethodNotSupportedException;
 import org.vitrivr.cineast.api.rest.iiif.IIIFRequest;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.io.IOException;
+
 
 public class IIIFRoute implements Route {
+
+
+  private static final Logger LOGGER = LogManager.getLogger();
+
+  ObjectMapper mapper = new ObjectMapper();
+
+
 
   @Override
   public Object handle(Request request, Response response) throws Exception {
@@ -41,17 +53,27 @@ public class IIIFRoute implements Route {
 
 
   private String handleRequest(Request request) {
-    JsonObject json = JsonObject.readFrom(request.body());
+    JsonNode json = null;
+    ObjectNode response = mapper.createObjectNode();
+
+    try {
+      json = mapper.readTree(request.body());
+    } catch (IOException e) {
+      response.put("status", 500);
+      response.put("errorMessage", "could not read json");
+      return response.toString();
+    }
+
     IIIFRequest requestObject = validate(json);
-    JsonObject response = new JsonObject();
     if (requestObject.getRequestError() != null) {
       response = requestObject.getRequestError();
     } else {
       // start process here
 
-      response.add("status","200");
-      response.add("institution", requestObject.getInstitution());
-      response.add("numberOfResources", requestObject.getContent().size());
+      response.put("status","200");
+      response.put("institution", requestObject.getInstitution());
+      response.put("numberOfResources", requestObject.getContent().size());
+      response.put("identifier", 0);
     }
 
 
@@ -65,12 +87,12 @@ public class IIIFRoute implements Route {
 
 
   private String getHelp() {
-    JsonObject help = new JsonObject();
-    help.add("title","IIIF content registration");
-    help.add("description","cineast api to register content for retrieval.");
-    help.add("endpoint", "/iiif/register");
-    help.add("method","POST");
-    help.add("type", "application/json");
+    ObjectNode help = mapper.createObjectNode();
+    help.put("title","IIIF content registration");
+    help.put("description","cineast api to register content for retrieval.");
+    help.put("endpoint", "/iiif/register");
+    help.put("method","POST");
+    help.put("type", "application/json");
     // add definition of fields
     // add example request
     // add example responses
@@ -80,19 +102,20 @@ public class IIIFRoute implements Route {
 
 
 
-  public IIIFRequest validate(JsonObject json) {
+  public IIIFRequest validate(JsonNode json) {
     String institution = "";
     String iiifEndpoint = "";
-    JsonArray content = new JsonArray();
+    JsonNode content;
 
     int errors = 0;
-    JsonArray errorMsg = new JsonArray();
+    ArrayNode errorMsg = mapper.createArrayNode();
 
     IIIFRequest requestObject = new IIIFRequest();
 
     // institution
+    //if (json.has("isnstitution"))
     try {
-      institution = json.get("institution").asString();
+      institution = json.get("institution").asText();
       if (institution.equals("")) {
         errorMsg.add("empty value for institution");
         errors += 1;
@@ -105,7 +128,7 @@ public class IIIFRoute implements Route {
 
     // iiifEndpoint
     try {
-      iiifEndpoint = json.get("iiifEndpoint").asString();
+      iiifEndpoint = json.get("iiifEndpoint").asText();
       if (iiifEndpoint.equals("")) {
         errorMsg.add("empty value for iiifEndpoint");
         errors += 1;
@@ -118,7 +141,7 @@ public class IIIFRoute implements Route {
 
     // content
     try {
-      content = json.get("content").asArray();
+      content = json.get("content");
       if (content.size() == 0) {
         errorMsg.add("content must be nonempty array");
         errors += 1;
@@ -130,15 +153,9 @@ public class IIIFRoute implements Route {
         String image;
         String meta;
 
-        /*
-        try {
 
-        } catch () {
-          errorMsg.add("");
-          errors += 1;
-          continue;
-        }
-        */
+
+
 
 
         //requestObject.addContent(project, image, meta);
@@ -153,11 +170,11 @@ public class IIIFRoute implements Route {
 
 
     // invalid request
-    if (errors != 0) {
-      JsonObject requestError = new JsonObject();
-      requestError.add("status","400");
-      requestError.add("errors", errors);
-      requestError.add("errorMessage", errorMsg);
+    if (errorMsg.size() != 0) {
+      ObjectNode requestError = mapper.createObjectNode();
+      requestError.put("status","400");
+      requestError.put("errors", errorMsg.size());
+      requestError.put("errorMessage", errorMsg);
       requestObject.setRequestError(requestError);
     }
 
