@@ -1,6 +1,6 @@
 {
 	"database": {
-		"host": "10.34.58.93",
+		"host": "0.0.0.0",
 		"selector": "ADAMPRO",
     "writer": "ADAMPRO",
 		"port": 5890,
@@ -148,8 +148,8 @@
 		"serveContent": true,
 		"serveUI": true,
 		"uiLocation": "dist",
-		"thumbnailLocation": "thumbnails",
-		"objectLocation": "objects"
+		"thumbnailLocation": "/Users/Lukas/Downloads/imgserver2/html/thumbnails/",
+		"objectLocation": "/Users/Lukas/Downloads/imgserver2/html/images/"
 	},
 
 	"visualization": {
