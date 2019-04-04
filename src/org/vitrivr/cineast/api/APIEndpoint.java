@@ -177,8 +177,10 @@ public class APIEndpoint {
           });
         }
         service.path(makePath("iiif"), () -> {
+            service.get("", new IIIFRoute());
             service.get("/", new IIIFRoute());
             service.post("/register", new IIIFRoute());
+            service.post("/register/", new IIIFRoute());
         });
     }
 

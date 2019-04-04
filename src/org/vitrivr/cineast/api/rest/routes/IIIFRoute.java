@@ -77,18 +77,7 @@ public class IIIFRoute implements Route {
   }
 
 
-  private String getHelp() {
-    ObjectNode help = mapper.createObjectNode();
-    help.put("title","IIIF content registration");
-    help.put("description","cineast api to register content for retrieval.");
-    help.put("endpoint", "/iiif/register");
-    help.put("method","POST");
-    help.put("type", "application/json");
-    // add definition of fields
-    // add example request
-    // add example responses
-
-
+  public String getHelp() {
     try {
       StringBuilder result = new StringBuilder();
       FileReader fileReader = new FileReader(APISPECIFICATION);
