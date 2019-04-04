@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,16 +13,15 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 
 public class IIIFRoute implements Route {
-
-
+  private final String APISPECIFICATION = "./resources/iiif.html";
   private static final Logger LOGGER = LogManager.getLogger();
-
-  ObjectMapper mapper = new ObjectMapper();
-
+  private ObjectMapper mapper = new ObjectMapper();
 
 
   @Override
@@ -49,7 +47,6 @@ public class IIIFRoute implements Route {
         throw new MethodNotSupportedException(request);
     }
   }
-
 
 
   private String handleRequest(Request request) {
@@ -80,7 +77,6 @@ public class IIIFRoute implements Route {
   }
 
 
-
   private String getHelp() {
     ObjectNode help = mapper.createObjectNode();
     help.put("title","IIIF content registration");
@@ -91,10 +87,21 @@ public class IIIFRoute implements Route {
     // add definition of fields
     // add example request
     // add example responses
-    return "<h1>IIIF Endpoint</h1><p>Add API specification here</p>";//help.toString();
+
+
+    try {
+      StringBuilder result = new StringBuilder();
+      FileReader fileReader = new FileReader(APISPECIFICATION);
+      BufferedReader bufferedReader = new BufferedReader(fileReader);
+      String current;
+      while ((current = bufferedReader.readLine()) != null) {
+        result.append(current + "\n");
+      }
+      return result.toString();
+    } catch (IOException e) {
+      return "<h1>IIIF Endpoint</h1><p>500: could not find specification</p>";
+    }
   }
-
-
 
 
   public IIIFRequest validate(JsonNode json) {
