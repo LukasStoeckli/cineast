@@ -6,6 +6,93 @@
 </head>
 <body>
     <h1>IIIF Endpoint</h1>
-    <p>Add API specification here</p>
+
+    <h2>Registration API</h2>
+    <p>Endpoint: POST iiif/register</p>
+    <p>Type: application/json</p>
+    <p>Description: Endpoint for institutions to register their content and make it searchable</p>
+
+
+    <h3>Request Fields</h3>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Data Type</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>institution</td>
+            <td>String</td>
+            <td>Institution that holds content</td>
+        </tr>
+        <tr>
+            <td>iiifEndpoint</td>
+            <td>String</td>
+            <td>IIIF endpoint of institution</td>
+        </tr>
+        <tr>
+            <td>content</td>
+            <td>Array</td>
+            <td>Information per image</td>
+        </tr>
+        <tr>
+            <td>project</td>
+            <td>String</td>
+            <td>project associated with URL</td>
+        </tr>
+        <tr>
+            <td>image</td>
+            <td>String</td>
+            <td>image id (for IIIF url)</td>
+        </tr>
+        <tr>
+            <td>meta</td>
+            <td>String</td>
+            <td>Metadata of image</td>
+        </tr>
+    </table>
+
+    <h3>Example Request</h3>
+    <code>
+        {
+            "institution":"DaSCH",
+            "iiifEndpoint":"iiif.dasch.swiss/",
+            "content":[
+                {
+                    "project": "sweee",
+                    "image": "sdfr",
+                    "meta": "sdgsdfds"
+                },
+                {
+                    "project": "scheeeee",
+                    "image": "sdfs",
+                    "meta": "jahui"
+                }
+            ]
+        }
+    </code>
+
+    <h3>Example Responses</h3>
+    <p>Successful Registration</p>
+    <code>
+        {
+            status : 200,
+            institution: "DaSCH",
+            numberOfResources: "2", 
+            equestID: 1
+        }
+    </code>
+
+    <p>Missing values, empty fields</p>
+    <code>
+        {
+            status : 400, 
+            errorMessage : [
+                “Missing value for institution”,
+                "empty value for iiifEndpoint",
+                "content must be nonempty array"
+            ]
+        }
+    </code>
 </body>
 </html>
