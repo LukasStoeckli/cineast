@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>IIIF Endpoint</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #eeeeee;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
 </head>
 <body>
     <h1>IIIF Endpoint</h1>
@@ -53,46 +70,54 @@
     </table>
 
     <h3>Example Request</h3>
-    <code>
-        {
-            "institution":"DaSCH",
-            "iiifEndpoint":"iiif.dasch.swiss/",
-            "content":[
-                {
-                    "project": "sweee",
-                    "image": "sdfr",
-                    "meta": "sdgsdfds"
-                },
-                {
-                    "project": "scheeeee",
-                    "image": "sdfs",
-                    "meta": "jahui"
-                }
-            ]
-        }
-    </code>
+    <pre>
+        <code>
+            {
+                "institution":"DaSCH",
+                "iiifEndpoint":"iiif.dasch.swiss/",
+                "content":[
+                    {
+                        "project": "sweee",
+                        "image": "sdfr",
+                        "meta": "sdgsdfds"
+                    },
+                    {
+                        "project": "scheeeee",
+                        "image": "sdfs",
+                        "meta": "jahui"
+                    }
+                ]
+            }
+        </code>
+    </pre>
+
 
     <h3>Example Responses</h3>
     <p>Successful Registration</p>
-    <code>
-        {
-            status : 200,
-            institution: "DaSCH",
-            numberOfResources: "2", 
-            equestID: 1
-        }
-    </code>
+    <pre>
+        <code>
+            {
+                status : 200,
+                institution: "DaSCH",
+                numberOfResources: "2", 
+                requestID: 1
+            }
+        </code>
+    </pre>
+
 
     <p>Missing values, empty fields</p>
-    <code>
-        {
-            status : 400, 
-            errorMessage : [
-                “Missing value for institution”,
-                "empty value for iiifEndpoint",
-                "content must be nonempty array"
-            ]
-        }
-    </code>
+    <pre>
+        <code>
+            {
+                status : 400, 
+                errorMessage : [
+                    “Missing value for institution”,
+                    "empty value for iiifEndpoint",
+                    "content must be nonempty array"
+                ]
+            }
+        </code>
+    </pre>
 </body>
 </html>
