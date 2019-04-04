@@ -76,11 +76,6 @@ public class IIIFRoute implements Route {
       response.put("identifier", 0);
     }
 
-
-
-
-
-
     return response.toString();
   }
 
@@ -103,71 +98,44 @@ public class IIIFRoute implements Route {
 
 
   public IIIFRequest validate(JsonNode json) {
-    String institution = "";
-    String iiifEndpoint = "";
+    String institution;
+    String iiifEndpoint;
     JsonNode content;
-
-    int errors = 0;
     ArrayNode errorMsg = mapper.createArrayNode();
-
     IIIFRequest requestObject = new IIIFRequest();
 
     // institution
-    //if (json.has("isnstitution"))
-    try {
+    if (json.has("institution")) {
       institution = json.get("institution").asText();
-      if (institution.equals("")) {
-        errorMsg.add("empty value for institution");
-        errors += 1;
-      }
+      if (institution.equals("")) { errorMsg.add("empty value for institution"); }
       requestObject.setInstitution(institution);
-    } catch (NullPointerException e) {
-      errorMsg.add("missing value for institution");
-      errors += 1;
-    }
+    } else { errorMsg.add("missing value for institution"); }
 
     // iiifEndpoint
-    try {
+    if (json.has("iiifEndpoint")) {
       iiifEndpoint = json.get("iiifEndpoint").asText();
-      if (iiifEndpoint.equals("")) {
-        errorMsg.add("empty value for iiifEndpoint");
-        errors += 1;
-      }
+      if (iiifEndpoint.equals("")) { errorMsg.add("empty value for iiifEndpoint"); }
       requestObject.setEndpoint(iiifEndpoint);
-    } catch (NullPointerException e) {
-      errorMsg.add("missing value for iiifEndpoint");
-      errors += 1;
-    }
+    } else { errorMsg.add("missing value for iiifEndpoint"); }
 
     // content
-    try {
+    if (json.has("content")) {
       content = json.get("content");
-      if (content.size() == 0) {
-        errorMsg.add("content must be nonempty array");
-        errors += 1;
-      }
+      if (content.size() == 0) { errorMsg.add("content must be nonempty array"); }
       for (int i = 0; i < content.size(); i++) {
         System.out.println(i + "th elem: " + content.get(i));
-
-        String project;
-        String image;
-        String meta;
-
-
-
-
-
-
-        //requestObject.addContent(project, image, meta);
+        if (content.get(i).has("project") && !content.get(i).get("project").equals("")) {
+          if (content.get(i).has("image") && !content.get(i).get("image").equals("")) {
+            if (content.get(i).has("meta") && !content.get(i).get("meta").equals("")) {
+              String project = content.get(i).get("project").asText();
+              String image = content.get(i).get("image").asText();
+              String meta = content.get(i).get("meta").asText();
+              requestObject.addContent(project, image, meta);
+            } else { errorMsg.add("missing value for meta in element " + (i+1)); }
+          } else { errorMsg.add("missing value for image in element " + (i+1)); }
+        } else { errorMsg.add("missing value for project in element " + (i+1)); }
       }
-    } catch (NullPointerException e) {
-      errorMsg.add("missing value for content");
-      errors += 1;
-    }
-
-
-
-
+    } else { errorMsg.add("missing value for content"); }
 
     // invalid request
     if (errorMsg.size() != 0) {
@@ -178,12 +146,6 @@ public class IIIFRoute implements Route {
       requestObject.setRequestError(requestError);
     }
 
-
-
-
-
     return requestObject;
   }
-
-
 }
