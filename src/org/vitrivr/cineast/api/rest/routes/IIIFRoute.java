@@ -13,6 +13,7 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import javax.xml.bind.ValidationException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class IIIFRoute implements Route {
 
 
   private String handleRequest(Request request) {
-    JsonNode json = null;
+    JsonNode json;
     ObjectNode response = mapper.createObjectNode();
 
     try {
@@ -77,7 +78,7 @@ public class IIIFRoute implements Route {
   }
 
 
-  public String getHelp() {
+  private String getHelp() {
     try {
       StringBuilder result = new StringBuilder();
       FileReader fileReader = new FileReader(APISPECIFICATION);
@@ -93,9 +94,8 @@ public class IIIFRoute implements Route {
   }
 
 
-  public IIIFRequest validate(JsonNode json) {
+  private IIIFRequest validate(JsonNode json) {
     String institution;
-    String iiifEndpoint;
     JsonNode content;
     ArrayNode errorMsg = mapper.createArrayNode();
     IIIFRequest requestObject = new IIIFRequest();
@@ -107,29 +107,25 @@ public class IIIFRoute implements Route {
       requestObject.setInstitution(institution);
     } else { errorMsg.add("missing value for institution"); }
 
-    // iiifEndpoint
-    if (json.has("iiifEndpoint")) {
-      iiifEndpoint = json.get("iiifEndpoint").asText();
-      if (iiifEndpoint.equals("")) { errorMsg.add("empty value for iiifEndpoint"); }
-      requestObject.setEndpoint(iiifEndpoint);
-    } else { errorMsg.add("missing value for iiifEndpoint"); }
-
     // content
     if (json.has("content")) {
       content = json.get("content");
       if (content.size() == 0) { errorMsg.add("content must be nonempty array"); }
       for (int i = 0; i < content.size(); i++) {
         System.out.println(i + "th elem: " + content.get(i));
-        if (content.get(i).has("project") && !content.get(i).get("project").equals("")) {
-          if (content.get(i).has("image") && !content.get(i).get("image").equals("")) {
-            if (content.get(i).has("meta") && !content.get(i).get("meta").equals("")) {
-              String project = content.get(i).get("project").asText();
-              String image = content.get(i).get("image").asText();
-              String meta = content.get(i).get("meta").asText();
-              requestObject.addContent(project, image, meta);
-            } else { errorMsg.add("missing value for meta in element " + (i+1)); }
-          } else { errorMsg.add("missing value for image in element " + (i+1)); }
-        } else { errorMsg.add("missing value for project in element " + (i+1)); }
+        if (content.get(i).has("scheme") && !content.get(i).get("scheme").asText().equals("")) {
+          if (content.get(i).has("server") && !content.get(i).get("server").asText().equals("")) {
+            if (content.get(i).has("prefix") && !content.get(i).get("prefix").asText().equals("")) {
+              if (content.get(i).has("identifier") && !content.get(i).get("identifier").asText().equals("")) {
+                String scheme = content.get(i).get("scheme").asText();
+                String server = content.get(i).get("server").asText();
+                String prefix = content.get(i).get("prefix").asText();
+                String identifier = content.get(i).get("identifier").asText();
+                requestObject.addContent(scheme, server, prefix, identifier);
+              } else { errorMsg.add("missing value for identifier in element " + (i+1)); }
+            } else { errorMsg.add("missing value for prefix in element " + (i+1)); }
+          } else { errorMsg.add("missing value for server in element " + (i+1)); }
+        } else { errorMsg.add("missing value for scheme in element " + (i+1)); }
       }
     } else { errorMsg.add("missing value for content"); }
 
