@@ -81,7 +81,7 @@ class IIIFObject {
 
     public String getScheme() { return scheme; }
     public String getServer() { return server; }
-    public String getPrefix() { return identifier; }
+    public String getPrefix() { return prefix; }
     public String getIdentifier() { return identifier; }
 
     public String getBaseURI() {

@@ -1,6 +1,6 @@
 {
 	"database": {
-		"host": "0.0.0.0",
+		"host": "127.0.0.1",
 		"selector": "ADAMPRO",
     "writer": "ADAMPRO",
 		"port": 5890,

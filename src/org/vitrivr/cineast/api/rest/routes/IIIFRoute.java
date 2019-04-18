@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.vitrivr.cineast.api.rest.exceptions.MethodNotSupportedException;
+import org.vitrivr.cineast.api.rest.iiif.IIIFProcessor;
 import org.vitrivr.cineast.api.rest.iiif.IIIFRequest;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-import javax.xml.bind.ValidationException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -66,12 +66,11 @@ public class IIIFRoute implements Route {
     if (requestObject.getRequestError() != null) {
       response = requestObject.getRequestError();
     } else {
-      // start process here
-
+      int processID = IIIFProcessor.enqueue(requestObject);
       response.put("status","200");
       response.put("institution", requestObject.getInstitution());
       response.put("numberOfResources", requestObject.getContent().size());
-      response.put("identifier", 0);
+      response.put("processID", processID);
     }
 
     return response.toString();
