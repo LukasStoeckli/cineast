@@ -22,6 +22,10 @@ import java.nio.file.Paths;
 public class IIIFProcessor implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    static {
+
+    }
+
 
     @Override
     public void run() {
@@ -57,7 +61,7 @@ public class IIIFProcessor implements Runnable {
 
     private static ExtractionItemContainer[] download(IIIFRequest _iiif) {
         // create base directory
-        final String IMGDIR = "/tmp/vitrivr/";
+        final String IMGDIR = "/tmp/vitrivr/"; // move to config
         File folder = new File(IMGDIR + _iiif.getInstitution());
         if (!folder.exists()) { folder.mkdirs(); }
         LOGGER.debug("institution directory = {}", folder.toString());
@@ -76,9 +80,12 @@ public class IIIFProcessor implements Runnable {
             LOGGER.debug("prefix directory = {}", folder.toString());
 
 
+            // retrieve info.json for available formats
+
+
             // build iiif image api url
-            String imageURL = object.getBaseURI(); // + whole iiif stuff, maybe suffices to get image
-            String imageFile = IMGDIR + _iiif.getInstitution() + object.getPrefix() + "/" + object.getIdentifier() + ".jpg";
+            String imageURL = object.getBaseURI() + "/full/full/0/default.jpg"; // move to config or api
+            String imageFile = IMGDIR + _iiif.getInstitution() + object.getPrefix() + "/" + object.getIdentifier();
 
             LOGGER.debug("imageURL = {}", imageURL);
             LOGGER.debug("imageFile = {}", imageFile);
