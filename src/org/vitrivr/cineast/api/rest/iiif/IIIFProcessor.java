@@ -4,15 +4,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.presets.opencv_core;
 import org.vitrivr.cineast.api.SessionExtractionContainer;
+import org.vitrivr.cineast.core.data.entities.MediaObjectDescriptor;
+import org.vitrivr.cineast.core.data.entities.MediaObjectMetadataDescriptor;
 import org.vitrivr.cineast.core.run.ExtractionItemContainer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 
 /**
@@ -71,6 +76,13 @@ public class IIIFProcessor implements Runnable {
 
         // check if images already in db
 
+        // also make some buffer, to not overload filesystem
+        // must be synced with extraction thread
+
+
+
+        ArrayList<ExtractionItemContainer> items = new ArrayList<>();
+
 
 
         for (IIIFObject object: _iiif.getContent()) {
@@ -87,10 +99,13 @@ public class IIIFProcessor implements Runnable {
             String imageURL = object.getBaseURI() + "/full/full/0/default.jpg"; // move to config or api
             String imageFile = IMGDIR + _iiif.getInstitution() + object.getPrefix() + "/" + object.getIdentifier();
 
+
+            // just for debug purposes, make better
+            // some identifiers have file extension, but probably add file extension from iiif image api anyway
+            imageFile += ".jpg";
+
             LOGGER.debug("imageURL = {}", imageURL);
             LOGGER.debug("imageFile = {}", imageFile);
-            LOGGER.debug("prefix = {}", object.getPrefix());
-            LOGGER.debug("baseURI = {}", object.getBaseURI());
 
             try(InputStream in = new URL(imageURL).openStream()){
                 Files.copy(in, Paths.get(imageFile));
@@ -100,22 +115,31 @@ public class IIIFProcessor implements Runnable {
                 // if success, build mediaaObjectDescriptor & MediaObjectMetaDataDescriptor
                 // and add elements to ExtractionItemContainer
 
+                MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(Paths.get(object.getBaseURI()));
+                MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[1];
+                mediaMetaDescriptor[0] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "institution", _iiif.getInstitution());
+                // maybe add more meta from request
 
+
+                Path path = Paths.get(imageFile);
+
+
+
+                items.add(new ExtractionItemContainer(mediaDescriptor, mediaMetaDescriptor, path));
 
 
             } catch (MalformedURLException e) {
                 LOGGER.error("Malformed URL for {}. SKipping object. {}", object.getBaseURI(), e.getMessage());
             } catch (IOException e) {
                 LOGGER.error("Could not retrieve {}. Skipping object. {}", object.getBaseURI(), e.getMessage());
+                e.printStackTrace();
             }
         }
 
 
 
-        ExtractionItemContainer[] items = null;
 
 
-
-        return items;
+        return items.toArray(new ExtractionItemContainer[0]);
     }
 }
