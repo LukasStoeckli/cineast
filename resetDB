@@ -1,0 +1,11 @@
+#bin/bash/
+
+docker stop adampro
+docker rm adampro
+docker run --name adampro -p 4040:4040 -p 5890:5890 -p 9099:9099 -d vitrivr/adampro:latest-selfcontained
+
+sleep 60
+
+cd build/libs/
+
+java -jar cineast.jar --setup

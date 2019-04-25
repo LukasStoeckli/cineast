@@ -26,9 +26,16 @@ import java.util.ArrayList;
  */
 public class IIIFProcessor implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String IMGDIR = "/tmp/vitrivr/"; // move to config
 
     static {
+        // create base directory
+        File folder = new File(IMGDIR);
+        if (!folder.exists()) { folder.mkdirs(); }
+        LOGGER.debug("create base directory for file download = {}", folder.toString());
 
+
+        System.setProperty("http.agent", "vitrivr");
     }
 
 
@@ -69,7 +76,7 @@ public class IIIFProcessor implements Runnable {
         final String IMGDIR = "/tmp/vitrivr/"; // move to config
         File folder = new File(IMGDIR + _iiif.getInstitution());
         if (!folder.exists()) { folder.mkdirs(); }
-        LOGGER.debug("institution directory = {}", folder.toString());
+        LOGGER.debug("create institution directory = {}", folder.toString());
 
 
 
@@ -89,13 +96,14 @@ public class IIIFProcessor implements Runnable {
             // create prefix directory
             folder = new File(IMGDIR + _iiif.getInstitution() + object.getPrefix());
             if (!folder.exists()) { folder.mkdirs(); }
-            LOGGER.debug("prefix directory = {}", folder.toString());
+            LOGGER.debug("create prefix directory = {}", folder.toString());
 
 
             // retrieve info.json for available formats
 
 
             // build iiif image api url
+            // use max size from config
             String imageURL = object.getBaseURI() + "/full/full/0/default.jpg"; // move to config or api
             String imageFile = IMGDIR + _iiif.getInstitution() + object.getPrefix() + "/" + object.getIdentifier();
 
