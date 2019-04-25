@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 
@@ -36,6 +37,7 @@ public class IIIFProcessor implements Runnable {
         System.setProperty("http.agent", "vitrivr");
     }
 
+    private static int processID = 0;
 
     @Override
     public void run() {
@@ -50,11 +52,7 @@ public class IIIFProcessor implements Runnable {
     public static int enqueue(IIIFRequest _iiif) {
 
 
-        // download images
-
-        // maybe set maxsize of request array
-        // or do it somehow dynamicly, downloading and deleting on need basis
-
+        // add to some arraylist or queue
 
 
         ExtractionItemContainer[] items = download(_iiif);
@@ -67,7 +65,7 @@ public class IIIFProcessor implements Runnable {
         SessionExtractionContainer.addPaths(items);
 
 
-        return 42;
+        return processID++;
     }
 
 
@@ -118,24 +116,16 @@ public class IIIFProcessor implements Runnable {
             try(InputStream in = new URL(imageURL).openStream()){
                 Files.copy(in, Paths.get(imageFile));
 
-
-
-                // if success, build mediaaObjectDescriptor & MediaObjectMetaDataDescriptor
-                // and add elements to ExtractionItemContainer
-
                 MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(Paths.get(object.getBaseURI()));
-                MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[1];
-                mediaMetaDescriptor[0] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "institution", _iiif.getInstitution());
-                // maybe add more meta from request
 
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[2];
+                mediaMetaDescriptor[0] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "institution", _iiif.getInstitution());
+                mediaMetaDescriptor[1] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "createdAt", timestamp.toString());
 
                 Path path = Paths.get(imageFile);
 
-
-
                 items.add(new ExtractionItemContainer(mediaDescriptor, mediaMetaDescriptor, path));
-
-
             } catch (MalformedURLException e) {
                 LOGGER.error("Malformed URL for {}. SKipping object. {}", object.getBaseURI(), e.getMessage());
             } catch (IOException e) {
