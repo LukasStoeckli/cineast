@@ -2,7 +2,6 @@ package org.vitrivr.cineast.api.rest.iiif;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bytedeco.javacpp.presets.opencv_core;
 import org.vitrivr.cineast.api.SessionExtractionContainer;
 import org.vitrivr.cineast.core.data.entities.MediaObjectDescriptor;
 import org.vitrivr.cineast.core.data.entities.MediaObjectMetadataDescriptor;
@@ -12,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +41,8 @@ public class IIIFProcessor implements Runnable {
     public void run() {
 
     }
+
+
 
 
 
@@ -149,5 +149,9 @@ public class IIIFProcessor implements Runnable {
 
 
         return items.toArray(new ExtractionItemContainer[0]);
+    }
+
+    public static IIIFRequest[] getProcessData() {
+        return null;
     }
 }

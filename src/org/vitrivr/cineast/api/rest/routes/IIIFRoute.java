@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.vitrivr.cineast.api.rest.exceptions.MethodNotSupportedException;
 import org.vitrivr.cineast.api.rest.iiif.IIIFProcessor;
 import org.vitrivr.cineast.api.rest.iiif.IIIFRequest;
 import spark.Request;
@@ -20,37 +19,40 @@ import java.io.IOException;
 
 
 public class IIIFRoute implements Route {
-  private final String APISPECIFICATION = "./resources/iiif.html";
+  private final String APISPECIFICATION = "./resources/iiif/specification.html";
+  private final String APISTATUS = "./resources/iiif/status.html";
+
   private static final Logger LOGGER = LogManager.getLogger();
   private ObjectMapper mapper = new ObjectMapper();
+  private String mode;
+
+  public IIIFRoute(String _mode) {
+    mode = _mode;
+  }
 
 
   @Override
   public Object handle(Request request, Response response) throws Exception {
-    System.out.println("\n- * - * - * - * - * -");
-    System.out.println("client ip: " + request.ip());
-    System.out.println("client user-agent: " + request.userAgent());
-    System.out.println("method: " + request.requestMethod());
-    System.out.println("type: " + request.contentType());
-    System.out.println("protocol: " + request.protocol());
-    System.out.println("headers: " + request.headers());
-    System.out.println("body: " + request.body());
+    String requestLog = "new " + mode + " request (protocol: " + request.protocol() + "ip: " + request.ip();
+    requestLog += " ua: " + request.userAgent() + " method: " + request.requestMethod() + ")";
+    LOGGER.info(requestLog);
 
-
-    switch(request.requestMethod()) {
-      case "GET":
-        response.type("text/html");
-        return getHelp();
-      case "POST":
+    switch (mode) {
+      case "extraction":
         response.type("application/json");
-        return handleRequest(request);
+        return handleExtraction(request);
+      case "specification":
+        response.type("text/html");
+        return handleSpecification();
+      case "status":
+        return handleStatus();
       default:
-        throw new MethodNotSupportedException(request);
+        throw new UnsupportedOperationException();
     }
   }
 
 
-  private String handleRequest(Request request) {
+  private String handleExtraction(Request request) {
     JsonNode json;
     ObjectNode response = mapper.createObjectNode();
 
@@ -77,10 +79,38 @@ public class IIIFRoute implements Route {
   }
 
 
-  private String getHelp() {
+  private String handleSpecification() {
+    return readHTML(APISPECIFICATION, "specification");
+  }
+
+  private String handleStatus() {
+    String status = readHTML(APISTATUS, "status");
+    String content;
+
+    // replace stuff from template with data from IIIFProcessor
+    IIIFRequest[] processes = IIIFProcessor.getProcessData();
+
+    if (processes == null) {
+      content = "<p>currently no extraction processes</p>";
+    } else {
+      content = "";
+      for (IIIFRequest proc: processes) {
+        content += "element";
+      }
+    }
+
+    status = status.replace("[[CONTENT]]", content);
+
+
+
+    return status;
+  }
+
+
+  private String readHTML(String file, String label) {
     try {
       StringBuilder result = new StringBuilder();
-      FileReader fileReader = new FileReader(APISPECIFICATION);
+      FileReader fileReader = new FileReader(file);
       BufferedReader bufferedReader = new BufferedReader(fileReader);
       String current;
       while ((current = bufferedReader.readLine()) != null) {
@@ -88,9 +118,11 @@ public class IIIFRoute implements Route {
       }
       return result.toString();
     } catch (IOException e) {
-      return "<h1>IIIF Endpoint</h1><p>500: could not find specification</p>";
+      LOGGER.error("unable to open file: " + file);
+      return "<h1>IIIF Endpoint</h1><p>500: could not find " + label + "</p>";
     }
   }
+
 
 
   private IIIFRequest validate(JsonNode json) {
@@ -111,7 +143,6 @@ public class IIIFRoute implements Route {
       content = json.get("content");
       if (content.size() == 0) { errorMsg.add("content must be nonempty array"); }
       for (int i = 0; i < content.size(); i++) {
-        System.out.println(i + "th elem: " + content.get(i));
         if (content.get(i).has("scheme") && !content.get(i).get("scheme").asText().equals("")) {
           if (content.get(i).has("server") && !content.get(i).get("server").asText().equals("")) {
             if (content.get(i).has("prefix") && !content.get(i).get("prefix").asText().equals("")) {
