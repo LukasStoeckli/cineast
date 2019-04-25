@@ -1,7 +1,4 @@
 package org.vitrivr.cineast.api.rest.iiif;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
@@ -34,33 +31,6 @@ public class IIIFRequest {
     public IIIFRequest() {
         content = new ArrayList<>();
     }
-
-
-
-
-
-    // check somewhere what data is already in db
-    // ditch invalid links? validate all urls in time for a response...
-
-
-    // get images and start exporter
-    public ObjectNode process() {
-
-        // foo.resolve(this)
-        // bar.extract(whatever)
-
-
-        return null;
-    }
-
-
-
-
-
-
-
-
-
 }
 
 
