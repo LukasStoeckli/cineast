@@ -152,6 +152,6 @@ public class IIIFProcessor implements Runnable {
     }
 
     public static IIIFRequest[] getProcessData() {
-        return null;
+        return new IIIFRequest[5];
     }
 }

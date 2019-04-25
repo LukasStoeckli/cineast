@@ -84,26 +84,31 @@ public class IIIFRoute implements Route {
   }
 
   private String handleStatus() {
-    String status = readHTML(APISTATUS, "status");
-    String content;
-
-    // replace stuff from template with data from IIIFProcessor
+    String content, status = readHTML(APISTATUS, "status");
     IIIFRequest[] processes = IIIFProcessor.getProcessData();
 
     if (processes == null) {
-      content = "<p>currently no extraction processes</p>";
+      content = "<p>currently no extraction in progress</p>";
     } else {
-      content = "";
+      content = "<table>";
+      content += "<tr>";
+      content += "<th style=\"width: 20%\">procID</th>";
+      content += "<th style=\"width: 20%\">whatever</th>";
+      content += "<th style=\"width: 60%\">something else</th>";
+      content += "</tr>";
+
       for (IIIFRequest proc: processes) {
-        content += "element";
+        content += "<tr>";
+        content += "<td>42</td>";
+        content += "<td>idk</td>";
+        content += "<td>lorem ipsum dolor sit amet</td>";
+        content += "</tr>";
       }
+
+      content += "</table>";
     }
 
-    status = status.replace("[[CONTENT]]", content);
-
-
-
-    return status;
+    return status.replace("[[CONTENT]]", content);
   }
 
 
