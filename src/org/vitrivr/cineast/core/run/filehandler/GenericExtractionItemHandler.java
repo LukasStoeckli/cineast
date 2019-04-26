@@ -1,5 +1,14 @@
 package org.vitrivr.cineast.core.run.filehandler;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -220,6 +229,26 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
         }
 
 
+        // delete file from web
+        if (pair.getLeft().getMetadata().length > 0) {
+          if (pair.getLeft().getMetadata()[0].getDomain().equals("iiif")) {
+            File imageFile = new File(pair.getLeft().getPathForExtraction().toString());
+            if (!imageFile.delete()) {
+              LOGGER.error("failed to delete " + pair.getLeft().getPathForExtraction());
+            }
+          }
+        }
+
+
+
+
+
+
+
+
+
+
+
             /* Increment the files counter. */
         this.count_processed += 1;
 
@@ -306,6 +335,58 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
           continue;
         }
         ExtractionItemContainer item = providerResult.get();
+
+
+
+
+        if (item.getPathForExtraction().toString().equals("iiif.jpg")) {
+          String baseURI = item.getObject().getPath();
+          baseURI = baseURI.substring(0,6) + "/" + baseURI.substring(6);
+
+
+          // find way to handle status of iiifObject
+
+
+          // build iiif image api url
+          // use max size from config
+          // use imgdir from config
+          String imageURL = baseURI + "/full/full/0/default.jpg"; // move to config or api
+          String imageFile = "/tmp/vitrivr/" + count_processed;
+          imageFile += ".jpg";
+
+
+          LOGGER.debug("imageURL = {}", imageURL);
+          LOGGER.debug("imageFile = {}", imageFile);
+
+
+
+          try(InputStream in = new URL(imageURL).openStream()){
+            Files.copy(in, Paths.get(imageFile));
+            item.setPathForExtraction(imageFile);
+          } catch (MalformedURLException e) {
+
+            // skip, set status
+
+
+            LOGGER.error("Malformed URL for {}. SKipping object. {}", item.getObject().getPath(), e.getMessage());
+          } catch (IOException e) {
+
+
+            // skip, set status
+
+
+            LOGGER.error("Could not retrieve {}. Skipping object. {}", item.getObject().getPath(), e.getMessage());
+            e.printStackTrace();
+          }
+
+
+
+        }
+
+
+
+
+
         String type = MimeTypeHelper.getContentType(item.getPathForExtraction().toString());
         if (handlers.entrySet().stream()
             .anyMatch(el -> el != null && el.getValue() != null && el.getValue().getKey() != null && el.getValue().getKey().supportedFiles().contains(type))) {

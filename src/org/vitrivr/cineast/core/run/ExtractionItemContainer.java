@@ -40,6 +40,14 @@ public class ExtractionItemContainer {
     return path;
   }
 
+  /**
+   * set the path where an image is located (e.g. downloaded to)
+   * @param _path path where image is downloaded to
+   */
+  public void setPathForExtraction(String _path) {
+    path = Paths.get(_path);
+  }
+
   public void setObject(MediaObjectDescriptor object) {
     this.object = object;
   }

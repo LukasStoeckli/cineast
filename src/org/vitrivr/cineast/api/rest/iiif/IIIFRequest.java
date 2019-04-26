@@ -46,7 +46,6 @@ class IIIFObject {
         server = _server;
         prefix = _prefix;
         identifier = _identifier;
-        System.out.println(getBaseURI());
     }
 
     public String getScheme() { return scheme; }

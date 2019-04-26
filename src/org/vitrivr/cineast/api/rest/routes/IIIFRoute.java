@@ -85,7 +85,7 @@ public class IIIFRoute implements Route {
 
   private String handleStatus() {
     String content, status = readHTML(APISTATUS, "status");
-    IIIFRequest[] processes = IIIFProcessor.getProcessData();
+    IIIFRequest[] processes = IIIFProcessor.getProcessQueue();
 
     if (processes == null) {
       content = "<p>currently no extraction in progress</p>";
