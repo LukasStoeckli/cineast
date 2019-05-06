@@ -229,6 +229,9 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
         }
 
 
+
+
+
         // delete file from web
         if (pair.getLeft().getMetadata().length > 0) {
           if (pair.getLeft().getMetadata()[0].getDomain().equals("iiif")) {
@@ -340,8 +343,12 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
 
 
         if (item.getPathForExtraction().toString().equals("iiif.jpg")) {
+
           String baseURI = item.getObject().getPath();
-          baseURI = baseURI.substring(0,6) + "/" + baseURI.substring(6);
+
+          LOGGER.debug("------ genericHandler -------- path: " + baseURI);
+
+          //baseURI = baseURI.substring(0,6) + "/" + baseURI.substring(6);
 
 
           // find way to handle status of iiifObject
@@ -378,6 +385,9 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
             LOGGER.error("Could not retrieve {}. Skipping object. {}", item.getObject().getPath(), e.getMessage());
             e.printStackTrace();
           }
+
+
+          // set status
 
 
 

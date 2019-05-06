@@ -69,6 +69,10 @@ public class MediaObjectDescriptor implements ExistenceCheck {
     this(null, path.getFileName().toString().replace('\\', '/'), getFileName(path), null, false);
   }
 
+  public MediaObjectDescriptor(String path) {
+    this(null, path, path, null, false);
+  }
+
   /**
    * Completely empty Descriptor
    */

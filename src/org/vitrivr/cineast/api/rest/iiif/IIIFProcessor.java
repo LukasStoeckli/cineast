@@ -82,10 +82,11 @@ public class IIIFProcessor implements Runnable {
 
         for (IIIFObject object: _iiif.getContent()) {
 
-            // retrieve info.json for available formats
+            // retrieve info.json?
 
             // paths does not support http/https!!!!!!!
-            MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(Paths.get(object.getBaseURI()));
+            MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(object.getBaseURI());
+            LOGGER.debug("---- schreeeehuiiiiaaaaaa ------ baseURI: " + object.getBaseURI());
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[2];
