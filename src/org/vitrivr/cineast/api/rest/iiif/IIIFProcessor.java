@@ -68,39 +68,29 @@ public class IIIFProcessor implements Runnable {
 
 
 
-
-        // check if images already in db
-
-        // also make some buffer, to not overload filesystem
-        // must be synced with extraction thread
-
-
-
         ArrayList<ExtractionItemContainer> items = new ArrayList<>();
 
 
 
         for (IIIFObject object: _iiif.getContent()) {
 
-            // retrieve info.json?
-
-            // paths does not support http/https!!!!!!!
             MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(object.getBaseURI());
-            LOGGER.debug("---- schreeeehuiiiiaaaaaa ------ baseURI: " + object.getBaseURI());
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[2];
+            MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[4];
             mediaMetaDescriptor[0] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "institution", _iiif.getInstitution());
-            mediaMetaDescriptor[1] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "createdAt", timestamp.toString());
+            mediaMetaDescriptor[1] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "collection", object.getCollection());
+            mediaMetaDescriptor[2] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "extractedAt", timestamp.toString());
+            if (!object.getManifest().equals("")) {
+                mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", object.getManifest());
+            } else {
+                mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", "unknown");
+            }
 
             Path path = Paths.get("iiif.jpg");
 
             items.add(new ExtractionItemContainer(mediaDescriptor, mediaMetaDescriptor, path));
         }
-
-
-
-
 
         return items.toArray(new ExtractionItemContainer[0]);
     }

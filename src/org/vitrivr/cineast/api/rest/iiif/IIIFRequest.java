@@ -24,8 +24,8 @@ public class IIIFRequest {
     public void setEndpoint(String _endpoint) {endpoint = _endpoint;}
     public void setRequestError(ObjectNode _requestError) {requestError = _requestError;}
     // add content
-    public void addContent(String _scheme, String _server, String _prefix, String _identifier) {
-        content.add(new IIIFObject(_scheme, _server, _prefix, _identifier));
+    public void addContent(String _baseURI, String _collection, String _manifest) {
+        content.add(new IIIFObject(_baseURI, _collection, _manifest));
     }
     // constructor
     public IIIFRequest() {
@@ -36,26 +36,22 @@ public class IIIFRequest {
 
 
 class IIIFObject {
-    private String scheme;
-    private String server;
-    private String prefix;
-    private String identifier;
+    private String baseURI;
+    private String collection;
+    private String manifest;
 
-    public IIIFObject(String _scheme, String _server, String _prefix, String _identifier) {
-        scheme = _scheme;
-        server = _server;
-        prefix = _prefix;
-        identifier = _identifier;
+    public IIIFObject(String _baseURI, String _collection, String _manifest) {
+        baseURI = _baseURI;
+        collection = _collection;
+        manifest = _manifest;
     }
-
-    public String getScheme() { return scheme; }
-    public String getServer() { return server; }
-    public String getPrefix() { return prefix; }
-    public String getIdentifier() { return identifier; }
 
     public String getBaseURI() {
         // RFC6570
         // {scheme}://{server}{/prefix}/{identifier}
-        return scheme + "://" + server + prefix + "/" + identifier;
+        return baseURI;
     }
+
+    public String getCollection() { return collection; }
+    public String getManifest() { return manifest; }
 }

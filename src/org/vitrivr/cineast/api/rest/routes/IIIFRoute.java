@@ -93,15 +93,15 @@ public class IIIFRoute implements Route {
       content = "<table>";
       content += "<tr>";
       content += "<th style=\"width: 20%\">procID</th>";
-      content += "<th style=\"width: 20%\">whatever</th>";
-      content += "<th style=\"width: 60%\">something else</th>";
+      content += "<th style=\"width: 20%\">status</th>";
+      content += "<th style=\"width: 60%\">description</th>";
       content += "</tr>";
 
       for (IIIFRequest proc: processes) {
         content += "<tr>";
         content += "<td>42</td>";
-        content += "<td>idk</td>";
-        content += "<td>lorem ipsum dolor sit amet</td>";
+        content += "<td>pending</td>";
+        content += "<td>element is in the queue and waiting for extraction</td>";
         content += "</tr>";
       }
 
@@ -148,19 +148,17 @@ public class IIIFRoute implements Route {
       content = json.get("content");
       if (content.size() == 0) { errorMsg.add("content must be nonempty array"); }
       for (int i = 0; i < content.size(); i++) {
-        if (content.get(i).has("scheme") && !content.get(i).get("scheme").asText().equals("")) {
-          if (content.get(i).has("server") && !content.get(i).get("server").asText().equals("")) {
-            if (content.get(i).has("prefix") && !content.get(i).get("prefix").asText().equals("")) {
-              if (content.get(i).has("identifier") && !content.get(i).get("identifier").asText().equals("")) {
-                String scheme = content.get(i).get("scheme").asText();
-                String server = content.get(i).get("server").asText();
-                String prefix = content.get(i).get("prefix").asText();
-                String identifier = content.get(i).get("identifier").asText();
-                requestObject.addContent(scheme, server, prefix, identifier);
-              } else { errorMsg.add("missing value for identifier in element " + (i+1)); }
-            } else { errorMsg.add("missing value for prefix in element " + (i+1)); }
-          } else { errorMsg.add("missing value for server in element " + (i+1)); }
-        } else { errorMsg.add("missing value for scheme in element " + (i+1)); }
+        if (content.get(i).has("baseURI") && !content.get(i).get("baseURI").asText().equals("")) {
+          if (content.get(i).has("collection") && !content.get(i).get("collection").asText().equals("")) {
+            String baseURI = content.get(i).get("baseURI").asText();
+            String collection = content.get(i).get("collection").asText();
+            String manifest = "";
+            if (content.get(i).has("manifest") && !content.get(i).get("manifest").asText().equals("")) {
+              manifest = content.get(i).get("manifest").asText();
+            }
+            requestObject.addContent(baseURI, collection, manifest);
+          } else { errorMsg.add("missing value for baseURI in element " + (i+1)); }
+        } else { errorMsg.add("missing value for collection in element " + (i+1)); }
       }
     } else { errorMsg.add("missing value for content"); }
 
