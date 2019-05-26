@@ -22,6 +22,11 @@ import org.vitrivr.cineast.core.data.entities.MediaObjectMetadataDescriptor;
  */
 public class ExtractionItemContainer {
 
+  private boolean isIIIF = false;
+
+  @JsonIgnore
+  private String status = "new";
+
   private MediaObjectDescriptor object;
 
   private MediaObjectMetadataDescriptor[] metadata;
@@ -97,4 +102,10 @@ public class ExtractionItemContainer {
       throw new RuntimeException("Path was null for object " + object);
     }
   }
+
+  public void setStatus(String _status) { status = _status; }
+  public String getStatus() { return status; }
+
+  public void setIIIF(Boolean _isIIIF) { isIIIF = _isIIIF; }
+  public Boolean isIIIF() { return isIIIF; }
 }

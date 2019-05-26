@@ -35,11 +35,11 @@ public class IIIFRoute implements Route {
   public Object handle(Request request, Response response) throws Exception {
     String requestLog = "new " + mode + " request (protocol: " + request.protocol() + "ip: " + request.ip();
     requestLog += " ua: " + request.userAgent() + " method: " + request.requestMethod() + ")";
-    LOGGER.info(requestLog);
 
     switch (mode) {
       case "extraction":
         response.type("application/json");
+        LOGGER.info(requestLog);
         return handleExtraction(request);
       case "specification":
         response.type("text/html");
@@ -87,21 +87,25 @@ public class IIIFRoute implements Route {
     String content, status = readHTML(APISTATUS, "status");
     IIIFRequest[] processes = IIIFProcessor.getProcessQueue();
 
-    if (processes == null) {
+    if (processes.length == 0) {
       content = "<p>currently no extraction in progress</p>";
     } else {
       content = "<table>";
       content += "<tr>";
-      content += "<th style=\"width: 20%\">procID</th>";
+      content += "<th style=\"width: 20%\">process ID</th>";
       content += "<th style=\"width: 20%\">status</th>";
-      content += "<th style=\"width: 60%\">description</th>";
+      content += "<th style=\"width: 60%\">error</th>";
       content += "</tr>";
 
       for (IIIFRequest proc: processes) {
         content += "<tr>";
-        content += "<td>42</td>";
-        content += "<td>pending</td>";
-        content += "<td>element is in the queue and waiting for extraction</td>";
+        content += "<td>" + proc.getProcessID() + "</td>";
+        content += "<td>" + proc.getStatus() + "</td>";
+        content += "<td><ul>";
+        for (String error: proc.getErrors()) {
+          content += "<li>" + error + "</li>";
+        }
+        content += "</ul></td>";
         content += "</tr>";
       }
 

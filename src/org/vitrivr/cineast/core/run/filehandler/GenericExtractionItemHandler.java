@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
@@ -60,6 +59,7 @@ import org.vitrivr.cineast.core.segmenter.general.PassthroughSegmenter;
 import org.vitrivr.cineast.core.segmenter.general.Segmenter;
 import org.vitrivr.cineast.core.segmenter.image.ImageSegmenter;
 import org.vitrivr.cineast.core.segmenter.video.VideoHistogramSegmenter;
+import org.vitrivr.cineast.core.util.FileUtil;
 import org.vitrivr.cineast.core.util.LogHelper;
 import org.vitrivr.cineast.core.util.MimeTypeHelper;
 import org.vitrivr.cineast.core.util.ReflectionHelper;
@@ -233,12 +233,11 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
 
 
         // delete file from web
-        if (pair.getLeft().getMetadata().length > 0) {
-          if (pair.getLeft().getMetadata()[0].getDomain().equals("iiif")) {
-            File imageFile = new File(pair.getLeft().getPathForExtraction().toString());
-            if (!imageFile.delete()) {
-              LOGGER.error("failed to delete " + pair.getLeft().getPathForExtraction());
-            }
+        if (pair.getLeft().isIIIF()) {
+          File imageFile = new File(pair.getLeft().getPathForExtraction().toString());
+          pair.getLeft().setStatus("done");
+          if (!imageFile.delete()) {
+            LOGGER.error("failed to delete " + pair.getLeft().getPathForExtraction());
           }
         }
 
@@ -308,6 +307,15 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
       this.metadataWriter.close();
       this.objectReader.close();
       this.segmentReader.close();
+
+      try {
+        FileUtils.deleteDirectory(new File("/tmp/vitrivr/"));
+      } catch (IOException e) {
+        LOGGER.error("failed to delete download directory");
+      }
+
+
+
       LOGGER.debug("Done");
     }
   }
@@ -342,13 +350,10 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
 
 
 
-        if (item.getPathForExtraction().toString().equals("iiif.jpg")) {
-
+        if (item.isIIIF()) {
+          item.setStatus("downloading");
           String baseURI = item.getObject().getPath();
-
-          LOGGER.debug("------ genericHandler -------- path: " + baseURI);
-
-          //baseURI = baseURI.substring(0,6) + "/" + baseURI.substring(6);
+          LOGGER.debug("download resource from IIIF: " + baseURI);
 
 
           // find way to handle status of iiifObject
@@ -358,12 +363,12 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
           // use max size from config
           // use imgdir from config
           String imageURL = baseURI + "/full/full/0/default.jpg"; // move to config or api
-          String imageFile = "/tmp/vitrivr/" + count_processed;
-          imageFile += ".jpg";
 
-
-          LOGGER.debug("imageURL = {}", imageURL);
-          LOGGER.debug("imageFile = {}", imageFile);
+          String imageFile = "/tmp/vitrivr/iiif.jpg";
+          // delete if already exists
+          if (!(new File(imageFile)).delete()) {
+            LOGGER.error("failed to delete tmp image file. may not exist yet");
+          }
 
 
 
@@ -371,26 +376,15 @@ public class GenericExtractionItemHandler implements Runnable, ExtractionItemPro
             Files.copy(in, Paths.get(imageFile));
             item.setPathForExtraction(imageFile);
           } catch (MalformedURLException e) {
-
-            // skip, set status
-
-
+            item.setStatus("failed: " + "malformed URI: " + baseURI);
             LOGGER.error("Malformed URL for {}. SKipping object. {}", item.getObject().getPath(), e.getMessage());
+            return this.nextItem();
           } catch (IOException e) {
-
-
-            // skip, set status
-
-
+            item.setStatus("failed: " + "could not resolve: " + baseURI);
             LOGGER.error("Could not retrieve {}. Skipping object. {}", item.getObject().getPath(), e.getMessage());
-            e.printStackTrace();
+            return this.nextItem();
           }
-
-
-          // set status
-
-
-
+          item.setStatus("extracting");
         }
 
 

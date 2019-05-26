@@ -9,3 +9,7 @@ sleep 60
 cd build/libs/
 
 java -jar cineast.jar --setup
+
+docker restart adampro
+
+sleep 60

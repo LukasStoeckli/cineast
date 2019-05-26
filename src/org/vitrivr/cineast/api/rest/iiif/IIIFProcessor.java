@@ -3,14 +3,9 @@ package org.vitrivr.cineast.api.rest.iiif;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vitrivr.cineast.api.SessionExtractionContainer;
-import org.vitrivr.cineast.core.data.entities.MediaObjectDescriptor;
-import org.vitrivr.cineast.core.data.entities.MediaObjectMetadataDescriptor;
 import org.vitrivr.cineast.core.run.ExtractionItemContainer;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 
@@ -21,9 +16,10 @@ import java.util.ArrayList;
 public class IIIFProcessor implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String IMGDIR = "/tmp/vitrivr/"; // move to config
+    private static ArrayList<IIIFRequest> queue;
 
     static {
-
+        queue = new ArrayList<>();
 
         System.setProperty("http.agent", "vitrivr");
     }
@@ -41,68 +37,25 @@ public class IIIFProcessor implements Runnable {
 
 
     public static int enqueue(IIIFRequest _iiif) {
-
-
-        // add to some arraylist or queue
-
-
-        ExtractionItemContainer[] items = download(_iiif);
-
-
-
+        // create base directory
+        File folder = new File(IMGDIR);
+        if (!folder.exists()) {
+            folder.mkdirs();
+            LOGGER.debug("create base directory for file download = {}", folder.toString());
+        }
 
         // add paths to SessionExtractionContainer
-
+        ExtractionItemContainer[] items = _iiif.getContent().toArray(new ExtractionItemContainer[0]);
         SessionExtractionContainer.addPaths(items);
 
-
+        // add request to queue
+        _iiif.setProcessID(processID);
+        queue.add(_iiif);
         return processID++;
     }
 
 
-    private static ExtractionItemContainer[] download(IIIFRequest _iiif) {
-        // create base directory
-        File folder = new File(IMGDIR);
-        if (!folder.exists()) { folder.mkdirs(); }
-        LOGGER.debug("create base directory for file download = {}", folder.toString());
-
-
-
-        ArrayList<ExtractionItemContainer> items = new ArrayList<>();
-
-
-
-        for (IIIFObject object: _iiif.getContent()) {
-
-            MediaObjectDescriptor mediaDescriptor = new MediaObjectDescriptor(object.getBaseURI());
-
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            MediaObjectMetadataDescriptor[] mediaMetaDescriptor = new MediaObjectMetadataDescriptor[4];
-            mediaMetaDescriptor[0] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "institution", _iiif.getInstitution());
-            mediaMetaDescriptor[1] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "collection", object.getCollection());
-            mediaMetaDescriptor[2] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "extractedAt", timestamp.toString());
-            if (!object.getManifest().equals("")) {
-                mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", object.getManifest());
-            } else {
-                mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", "unknown");
-            }
-
-            Path path = Paths.get("iiif.jpg");
-
-            items.add(new ExtractionItemContainer(mediaDescriptor, mediaMetaDescriptor, path));
-        }
-
-        return items.toArray(new ExtractionItemContainer[0]);
-    }
-
     public static IIIFRequest[] getProcessQueue() {
-
-        // return the list of active processes / requests
-
-
-        // iiifRequest needs fields for status of request, percentage done, status of single objects
-
-
-        return new IIIFRequest[5];
+        return queue.toArray(new IIIFRequest[0]);
     }
 }
