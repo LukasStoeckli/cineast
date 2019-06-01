@@ -40,9 +40,9 @@ public class IIIFRequest {
         mediaMetaDescriptor[1] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "collection", _collection);
         mediaMetaDescriptor[2] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "extractedAt", timestamp.toString());
         if (_manifest.equals("")) {
-            mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", _manifest);
-        } else {
             mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", "unknown");
+        } else {
+            mediaMetaDescriptor[3] = MediaObjectMetadataDescriptor.of(mediaDescriptor.getObjectId(), "iiif", "manifest", _manifest);
         }
 
         Path path = Paths.get("iiif.jpg");
