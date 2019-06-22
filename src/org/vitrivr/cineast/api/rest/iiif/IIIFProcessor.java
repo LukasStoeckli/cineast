@@ -13,26 +13,18 @@ import java.util.ArrayList;
  * processor singleton, that downloads images, builds container and passes them to the extractor
  * also holds status of requests
  */
-public class IIIFProcessor implements Runnable {
+public class IIIFProcessor {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String IMGDIR = "/tmp/vitrivr/"; // move to config
+
     private static ArrayList<IIIFRequest> queue;
+    private static int processID;
 
     static {
+        processID = 0;
         queue = new ArrayList<>();
-
         System.setProperty("http.agent", "vitrivr");
     }
-
-    private static int processID = 0;
-
-    @Override
-    public void run() {
-
-    }
-
-
-
 
 
 
